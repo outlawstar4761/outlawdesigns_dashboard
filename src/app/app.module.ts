@@ -3,6 +3,11 @@ import { NgModule } from '@angular/core';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
+
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { CookieService } from 'ngx-cookie-service';
+
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { PERFECT_SCROLLBAR_CONFIG } from 'ngx-perfect-scrollbar';
 import { PerfectScrollbarConfigInterface } from 'ngx-perfect-scrollbar';
@@ -54,7 +59,9 @@ import { ChartsModule } from 'ng2-charts';
     PerfectScrollbarModule,
     BsDropdownModule.forRoot(),
     TabsModule.forRoot(),
-    ChartsModule
+    ChartsModule,
+    FormsModule,
+    HttpClientModule
   ],
   declarations: [
     AppComponent,
@@ -64,10 +71,18 @@ import { ChartsModule } from 'ng2-charts';
     LoginComponent,
     RegisterComponent
   ],
-  providers: [{
-    provide: LocationStrategy,
-    useClass: HashLocationStrategy
-  }],
+  providers: [
+    {provide: LocationStrategy,useClass: HashLocationStrategy},
+    CookieService,
+    {provide:'RANDOMWORD',useValue:'http://api.outlawdesigns.io:9600'},
+    {provide:'ACCOUNT',useValue:'http://api.outlawdesigns.io:9661'},
+    {provide:'MSNGR',useValue:'http://api.outlawdesigns.io:9667'},
+    {provide:'WEBACCS',useValue:'http://api.outlawdesigns.io:9500'},
+    {provide:'BDYLIVE',useValue:'http://api.outlawdesigns.io:8663'},
+    {provide:'BDYDEV',useValue:'http://api.outlawdesigns.io:4663'},
+    {provide:'LOE',useValue:'http://api.outlawdesigns.io:9669'},
+    {provide:'WAMP',useValue:'http://api.outlawdesigns.io:9700'}
+  ],
   bootstrap: [ AppComponent ]
 })
 export class AppModule { }
