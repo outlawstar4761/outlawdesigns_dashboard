@@ -7,6 +7,7 @@ import{
   HttpHeaders,
 } from '@angular/common/http';
 
+import { ApiService } from './api.service';
 import { Request } from '../models/request';
 import { Client } from '../models/client';
 import { Host } from '../models/host';
@@ -18,11 +19,11 @@ export class WebaccessService {
   token:string;
   endPoint:string;
 
-  constructor(@Inject('WEBACCS') ENDPOINT,private http:HttpClient) {
+  constructor(@Inject('WEBACCS') ENDPOINT,private http:HttpClient,private ApiService:ApiService) {
     this.endPoint = ENDPOINT;
   }
   _buildAuthHeader():HttpHeaders{
-    return new HttpHeaders({'auth_token':this.token});
+    return new HttpHeaders({'auth_token':this.ApiService.token});
   }
   getRequest(id:number):Observable<Request[]>{
     let url = this.endPoint + '/request';
@@ -57,13 +58,13 @@ export class WebaccessService {
       });
     }));
   }
-  getDailyRequestTotal(dateStr:string):Observable<any>{
+  getDailyRequestTotal(dateStr?:string):Observable<any>{
     let url = this.endPoint + '/request/daily';
     if(dateStr !== undefined){
       url += '/' + dateStr;
     }
     return this.http.get<any>(url,{headers:this._buildAuthHeader()}).pipe(map(response=>{
-      return response
+      return response;
     }));
   }
   group(endPoint:string,key:string,value:string):Observable<any>{
@@ -72,6 +73,10 @@ export class WebaccessService {
   }
   count(endPoint:string):Observable<any>{
     let url = this.endPoint + '/' + endPoint + '/count';
+    return this.http.get<any>(url,{headers:this._buildAuthHeader()}).pipe(map(response=>{return response;}));
+  }
+  search(endPoint:string,key:string,value:string):Observable<Request[]>{
+    let url = this.endPoint + '/' + endPoint + '/search/' + key + '/' + value;
     return this.http.get<any>(url,{headers:this._buildAuthHeader()}).pipe(map(response=>{return response;}));
   }
 }

@@ -29,5 +29,8 @@ export class ApiService {
     let url = this.endPoint + '/verify';
     return this.http.get<any>(url,{headers:this._buildAuthHeader()}).pipe(map(response=>{return response}));
   }
+  testService(host):Observable<any>{
+    return this.http.get<any>(host,{headers:this._buildAuthHeader()}).pipe(map(response=>{return response}));
+  }
 
 }
