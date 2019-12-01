@@ -59,6 +59,8 @@ export class DashboardComponent implements OnInit {
     'November':0,
     'December':0
   };
+  public monthlyTotals: any = {};
+  public weeklyTotals: any = {};
   public now: Date = new Date();
   public dailyRequestLabels: Array<any> = [];
   public lineChartLegend = false;
@@ -189,25 +191,15 @@ export class DashboardComponent implements OnInit {
   ];
 
   // mainChart
-
-  public mainChartElements = 27;
+  protected _mainChartYAxisMax: number;
+  protected _mainChartYAxisStepSize: number;
   public mainChartData1: Array<number> = [];
-  public mainChartData2: Array<number> = [];
-  public mainChartData3: Array<number> = [];
 
   public mainChartData: Array<any> = [
     {
       data: this.mainChartData1,
       label: 'Current'
-    },
-    // {
-    //   data: this.mainChartData2,
-    //   label: 'Previous'
-    // },
-    // {
-    //   data: this.mainChartData3,
-    //   label: 'BEP'
-    // }
+    }
   ];
   public mainChartLabels: Array<any> = [];
   /* tslint:disable:max-line-length */
@@ -243,8 +235,8 @@ export class DashboardComponent implements OnInit {
         ticks: {
           beginAtZero: true,
           maxTicksLimit: 5,
-          stepSize: Math.ceil(100000 / 10),
-          max: 100000
+          stepSize: this._mainChartYAxisStepSize,
+          max: this._mainChartYAxisMax
         }
       }]
     },
@@ -353,38 +345,40 @@ export class DashboardComponent implements OnInit {
   public brandBoxChartLegend = false;
   public brandBoxChartType = 'line';
 
-  public random(min: number, max: number) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
-  }
-
   ngOnInit(): void {
     this.AccountService.checkCookie();
-    this._buildWeeklyRequests();
-    this._testServices();
+    //this._buildWeeklyRequests();
+    //this._testServices();
     this._buildRequestCounts();
-    // generate random values for mainChart
-    for (let i = 0; i <= this.mainChartElements; i++) {
-      //this.mainChartData1.push(this.random(50, 200));
-      this.mainChartData2.push(this.random(80, 100));
-      this.mainChartData3.push(65);
-    }
   }
   protected _buildRequestCounts(){
     let theDate = new Date();
     let thisMonth = theDate.getMonth();
     let thisYear = theDate.getFullYear();
+    let thisWeek = this._buildWeeklyDates();
     this.WebaccessService.getDailyRequestTotal().subscribe((data)=>{
       data.forEach((obj)=>{
         let reqDate = new Date(obj.reqDate);
         let reqCount = parseInt(obj.requests);
         if(reqDate.getFullYear() == thisYear){
           this.yearlyTotals[this._getMonthLabel(reqDate.getMonth())] += reqCount;
+          if(reqDate.getMonth() == thisMonth){
+            this.monthlyTotals[obj.reqDate] = reqCount;
+            for(let i in thisWeek){
+              if(reqDate.getDate() == new Date(i).getDate()){
+                this.weeklyTotals[obj.reqDate] = reqCount;
+              }
+            }
+          }
         }
       });
       for(let i in this.yearlyTotals){
         this.mainChartLabels.push(i);
         this.mainChartData1.push(this.yearlyTotals[i]);
       }
+      this._getMainChartMax();
+      console.log(this.weeklyTotals);
+      console.log(this.monthlyTotals);
     });
   }
   protected _buildWeeklyRequests(){
@@ -396,8 +390,8 @@ export class DashboardComponent implements OnInit {
         this.rawRandomWords.push(sortedData['api.outlawdesigns.io_9600'] === undefined ? 0:sortedData['api.outlawdesigns.io_9600'].length);
         this.rawAccounts.push(sortedData['api.outlawdesigns.io_9661'] === undefined ? 0:sortedData['api.outlawdesigns.io_9661'].length);
         this.rawWebAccess.push(sortedData['api.outlawdesigns.io_9500'] === undefined ? 0:sortedData['api.outlawdesigns.io_9500'].length);
-        this.rawMessenger.push(sortedData['api.outlawdesigns.io_9669'] === undefined ? 0:sortedData['api.outlawdesigns.io_9669'].length);
-        this.rawLOE.push(sortedData['api.outlawdesigns.io_9667'] === undefined ? 0:sortedData['api.outlawdesigns.io_9667'].length);
+        this.rawMessenger.push(sortedData['api.outlawdesigns.io_9667'] === undefined ? 0:sortedData['api.outlawdesigns.io_9669'].length);
+        this.rawLOE.push(sortedData['api.outlawdesigns.io_9669'] === undefined ? 0:sortedData['api.outlawdesigns.io_9667'].length);
         this.rawBuddyLive.push(sortedData['api.outlawdesigns.io_8663'] === undefined ? 0:sortedData['api.outlawdesigns.io_8663'].length);
         this.rawBuddyDev.push(sortedData['api.outlawdesigns.io_4663'] === undefined ? 0:sortedData['api.outlawdesigns.io_4663'].length);
         if(this.dailyRequestLabels.length === 7){
@@ -525,5 +519,10 @@ export class DashboardComponent implements OnInit {
       this._buddyDevClass[2] = 'bg-danger';
       this.buddyDevChartColors[0].backgroundColor = getStyle('--danger');
     });
+  }
+  protected _getMainChartMax(){
+    let highest = [...this.mainChartData1].sort()[this.mainChartData1.length - 1];
+    this._mainChartYAxisMax = (highest * .10) + highest;
+    this._mainChartYAxisStepSize = Math.ceil(this._mainChartYAxisMax / 10);
   }
 }
