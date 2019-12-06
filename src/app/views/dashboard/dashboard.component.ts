@@ -4,6 +4,7 @@ import { CustomTooltips } from '@coreui/coreui-plugin-chartjs-custom-tooltips';
 import { WebaccessService } from '../../services/webaccess.service';
 import { ApiService } from '../../services/api.service';
 import { AccountService } from '../../services/account.service';
+import { LoeService } from '../../services/loe.service';
 
 @Component({
   templateUrl: 'dashboard.component.html'
@@ -13,10 +14,11 @@ export class DashboardComponent implements OnInit {
   constructor(
     private WebaccessService:WebaccessService,
     private ApiService:ApiService,
-    private AccountService:AccountService
+    private AccountService:AccountService,
+    private LoeService:LoeService
   ){}
 
-  radioModel: string = 'Month';
+  radioModel: string = 'Year';
   protected rawRandomWords:Array<number> = [];
   protected rawAccounts: Array<number> = [];
   protected rawWebAccess:Array<number> = [];
@@ -31,7 +33,11 @@ export class DashboardComponent implements OnInit {
   protected loeRequests: Array<number> = [];
   protected buddyRequestsLive: Array<number> = [];
   protected buddyRequestsDev: Array<number> = [];
+  protected loeCounts: any = {};
+  protected weeklyStreaming: any = {};
   protected _lineChartLabel: string = 'Daily Requests';
+  protected _logMonitorWaitHours: number = 3;
+  protected _logMonitorCountDown: string;
   protected _randomWordClass = ['card','text-white','bg-primary'];
   protected _webAccessClass = ['card','text-white','bg-primary'];
   protected _accountsClass = ['card','text-white','bg-primary'];
@@ -44,6 +50,9 @@ export class DashboardComponent implements OnInit {
   public monthLabels: Array<string> = [
     'January','February','March','April','May','June',
     'July','August','September','October','November','December'
+  ];
+  public dayLabels: Array<string> = [
+    'Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'
   ];
   public yearlyTotals: any = {
     'January':0,
@@ -58,6 +67,12 @@ export class DashboardComponent implements OnInit {
     'October':0,
     'November':0,
     'December':0
+  };
+  public streamingTotals: any = {
+    'song':0,
+    'movie':0,
+    'doc':0,
+    'episode':0
   };
   public monthlyTotals: any = {};
   public weeklyTotals: any = {};
@@ -194,14 +209,13 @@ export class DashboardComponent implements OnInit {
   protected _mainChartYAxisMax: number;
   protected _mainChartYAxisStepSize: number;
   public mainChartData1: Array<number> = [];
-
+  public mainChartLabels: Array<any> = [];
   public mainChartData: Array<any> = [
     {
       data: this.mainChartData1,
       label: 'Current'
     }
   ];
-  public mainChartLabels: Array<any> = [];
   /* tslint:disable:max-line-length */
   //public mainChartLabels: Array<any> = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday', 'Thursday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   /* tslint:enable:max-line-length */
@@ -227,7 +241,8 @@ export class DashboardComponent implements OnInit {
         },
         ticks: {
           callback: function(value: any) {
-            return value.charAt(0);
+            // return value.charAt(0);
+            return value;
           }
         }
       }],
@@ -347,9 +362,11 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.AccountService.checkCookie();
-    //this._buildWeeklyRequests();
-    //this._testServices();
+    this._buildWeeklyRequests();
+    this._testServices();
     this._buildRequestCounts();
+    this._buildLoeCounts();
+    this._startLogMonitorCountDown();
   }
   protected _buildRequestCounts(){
     let theDate = new Date();
@@ -364,11 +381,12 @@ export class DashboardComponent implements OnInit {
           this.yearlyTotals[this._getMonthLabel(reqDate.getMonth())] += reqCount;
           if(reqDate.getMonth() == thisMonth){
             this.monthlyTotals[obj.reqDate] = reqCount;
-            for(let i in thisWeek){
-              if(reqDate.getDate() == new Date(i).getDate()){
-                this.weeklyTotals[obj.reqDate] = reqCount;
-              }
-            }
+          }
+        }
+        for(let i in thisWeek){
+          let testDate = new Date(thisWeek[i]);
+          if(reqDate.getDate() == testDate.getDate() && reqDate.getMonth() == testDate.getMonth() && reqDate.getFullYear() == testDate.getFullYear()){
+            this.weeklyTotals[obj.reqDate] = reqCount;
           }
         }
       });
@@ -377,9 +395,35 @@ export class DashboardComponent implements OnInit {
         this.mainChartData1.push(this.yearlyTotals[i]);
       }
       this._getMainChartMax();
-      console.log(this.weeklyTotals);
-      console.log(this.monthlyTotals);
     });
+  }
+  protected _updateMainChart(){
+    let updateData = [];
+    let updateLabels = [];
+    let data = null;
+    switch(this.radioModel){
+      case 'Year':
+      data = this.yearlyTotals;
+      break;
+      case 'Month':
+      data = this.monthlyTotals;
+      break;
+      case 'Week':
+      data = this.weeklyTotals;
+      break;
+    }
+    for(let i in data){
+      if(this.radioModel == 'Week'){
+        updateData.unshift(data[i]);
+        updateLabels.unshift(i);
+      }else{
+        updateData.push(data[i]);
+        updateLabels.push(i);
+      }
+    }
+    this.mainChartData[0].data = updateData;
+    this.mainChartLabels = updateLabels;
+    this._getMainChartMax();
   }
   protected _buildWeeklyRequests(){
     let dates = this._buildWeeklyDates();
@@ -390,8 +434,8 @@ export class DashboardComponent implements OnInit {
         this.rawRandomWords.push(sortedData['api.outlawdesigns.io_9600'] === undefined ? 0:sortedData['api.outlawdesigns.io_9600'].length);
         this.rawAccounts.push(sortedData['api.outlawdesigns.io_9661'] === undefined ? 0:sortedData['api.outlawdesigns.io_9661'].length);
         this.rawWebAccess.push(sortedData['api.outlawdesigns.io_9500'] === undefined ? 0:sortedData['api.outlawdesigns.io_9500'].length);
-        this.rawMessenger.push(sortedData['api.outlawdesigns.io_9667'] === undefined ? 0:sortedData['api.outlawdesigns.io_9669'].length);
-        this.rawLOE.push(sortedData['api.outlawdesigns.io_9669'] === undefined ? 0:sortedData['api.outlawdesigns.io_9667'].length);
+        this.rawMessenger.push(sortedData['api.outlawdesigns.io_9667'] === undefined ? 0:sortedData['api.outlawdesigns.io_9667'].length);
+        this.rawLOE.push(sortedData['api.outlawdesigns.io_9669'] === undefined ? 0:sortedData['api.outlawdesigns.io_9669'].length);
         this.rawBuddyLive.push(sortedData['api.outlawdesigns.io_8663'] === undefined ? 0:sortedData['api.outlawdesigns.io_8663'].length);
         this.rawBuddyDev.push(sortedData['api.outlawdesigns.io_4663'] === undefined ? 0:sortedData['api.outlawdesigns.io_4663'].length);
         if(this.dailyRequestLabels.length === 7){
@@ -400,12 +444,36 @@ export class DashboardComponent implements OnInit {
       });
     }
   }
+  protected _buildLoeCounts(){
+    let models = ['song','movie','doc','episode'];
+    let streamingModels = ['song'];
+    models.forEach((model)=>{
+      this.LoeService.getModelCount(model).subscribe((resultObj)=>{
+        this.loeCounts[model] = parseInt(resultObj.count);
+      });
+    });
+    let dates = this._buildWeeklyDates();
+    dates.forEach((date)=>{
+      let label = this._getDayLabel(new Date(date + ' UTC').getDay());
+      this.weeklyStreaming[date] = {};
+      streamingModels.forEach((model)=>{
+        let key = 'played' + model.charAt(0).toUpperCase() + model.slice(1);
+        this.LoeService.search(key,'playDate',date).subscribe((played)=>{
+          this.weeklyStreaming[date][model] = played.length;
+          this.streamingTotals[model] += played.length;
+        });
+      });
+    });
+  }
   protected _buildDateStr(dateStr){
     let theDate = (dateStr === undefined ? new Date():new Date(dateStr));
-    return theDate.getFullYear() + "-" + (theDate.getMonth() + 1) + "-" + theDate.getDate();
+    return theDate.getFullYear() + "-" + (theDate.getMonth() + 1) + "-" + (theDate.getDate() < 10 ? "0" + theDate.getDate() : theDate.getDate());
   }
   protected _getMonthLabel(monthNum){
     return this.monthLabels[monthNum];
+  }
+  protected _getDayLabel(dayNum){
+    return this.dayLabels[dayNum];
   }
   protected _buildWeeklyDates(){
     let today = new Date();
@@ -524,5 +592,27 @@ export class DashboardComponent implements OnInit {
     let highest = [...this.mainChartData1].sort()[this.mainChartData1.length - 1];
     this._mainChartYAxisMax = (highest * .10) + highest;
     this._mainChartYAxisStepSize = Math.ceil(this._mainChartYAxisMax / 10);
+  }
+  protected _calculateNextLogMonitorRun(lastRunStr){
+    let localTime = new Date(lastRunStr + ' UTC');
+    let nextRun = new Date(localTime.getTime() + (this._logMonitorWaitHours * 60 * 60 * 1000));
+    return nextRun;
+  }
+  protected _startLogMonitorCountDown(){
+    this.WebaccessService.recent('logmonitorrun',1).subscribe((lastRun)=>{
+      let interval = setInterval(()=>{
+        let nextRun = this._calculateNextLogMonitorRun(lastRun[0].StartTime + ' UTC');
+        let now = new Date().getTime();
+        let difference = nextRun.getTime() - now;
+        let hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        this._logMonitorCountDown = hours + 'h ' + minutes + 'm ' + seconds + 's';
+        if(difference < 0){
+          clearInterval(interval);
+          this._logMonitorCountDown = 'Executing';
+        }
+      },1000);
+    });
   }
 }

@@ -79,4 +79,8 @@ export class WebaccessService {
     let url = this.endPoint + '/' + endPoint + '/search/' + key + '/' + value;
     return this.http.get<any>(url,{headers:this._buildAuthHeader()}).pipe(map(response=>{return response;}));
   }
+  recent(endPoint:string,limit:number):Observable<any>{
+    let url = this.endPoint + '/' + endPoint + '/recent/' + limit;
+    return this.http.get<any>(url,{headers:this._buildAuthHeader()}).pipe(map(response=>{return response;}));
+  }
 }

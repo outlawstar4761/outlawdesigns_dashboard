@@ -62,7 +62,7 @@
             </div>
           </div>
           <div class="text-value">Web Access</div>
-          <div>api.outlawdesigns.io:9500</div>
+          <div>api.outlawdesigns.io:9500 <sub>{{_logMonitorCountDown}}</sub></div>
         </div>
         <div class="chart-wrapper mt-3" style="height:70px;">
           <canvas baseChart class="chart"
@@ -223,9 +223,9 @@
         <div class="col-sm-7 d-none d-md-block">
           <button type="button" class="btn btn-primary float-right"><i class="icon-cloud-download"></i></button>
           <div class="btn-group btn-group-toggle float-right mr-3" data-toggle="buttons">
-            <label class="btn btn-outline-secondary" [(ngModel)]="radioModel" btnRadio="Week" id="option1">Week</label>
-            <label class="btn btn-outline-secondary" [(ngModel)]="radioModel" btnRadio="Month" id="option2">Month</label>
-            <label class="btn btn-outline-secondary" [(ngModel)]="radioModel" btnRadio="Year" id="option3">Year</label>
+            <label class="btn btn-outline-secondary" [(ngModel)]="radioModel" btnRadio="Week" id="option1" (click)="_updateMainChart()">Week</label>
+            <label class="btn btn-outline-secondary" [(ngModel)]="radioModel" btnRadio="Month" id="option2" (click)="_updateMainChart()">Month</label>
+            <label class="btn btn-outline-secondary" [(ngModel)]="radioModel" btnRadio="Year" id="option3" (click)="_updateMainChart()">Year</label>
           </div>
         </div><!--/.col-->
       </div><!--/.row-->
@@ -400,120 +400,36 @@
                   <div class="callout callout-info">
                     <small class="text-muted">Movies</small>
                     <br>
-                    <strong class="h4">9,123</strong>
+                    <strong class="h4">{{loeCounts.movie}}, {{streamingTotals.movie}}</strong>
                   </div>
                 </div><!--/.col-->
                 <div class="col-sm-6">
                   <div class="callout callout-danger">
                     <small class="text-muted">Songs</small>
                     <br>
-                    <strong class="h4">22,643</strong>
+                    <strong class="h4">{{loeCounts.song}}, {{streamingTotals.song}}</strong>
                   </div>
                 </div><!--/.col-->
               </div><!--/.row-->
               <hr class="mt-0">
-              <div class="progress-group mb-4">
+              <div class="progress-group mb-4" *ngFor="let day of weeklyStreaming | keyvalue">
                 <div class="progress-group-prepend">
                   <span class="progress-group-text">
-                    Monday
+                    {{day.key}}
                   </span>
                 </div>
                 <div class="progress-group-bars">
                   <div class="progress progress-xs">
-                    <div class="progress-bar bg-info" role="progressbar" style="width: 34%" aria-valuenow="34" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-info" role="progressbar" [ngStyle]="{'width':day.value.movie + '%'}" aria-valuenow="day.value.movie" aria-valuemin="0" aria-valuemax="streamingTotals.movie"></div>
                   </div>
                   <div class="progress progress-xs">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 78%" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="progress-group mb-4">
-                <div class="progress-group-prepend">
-                  <span class="progress-group-text">
-                    Tuesday
-                  </span>
-                </div>
-                <div class="progress-group-bars">
-                  <div class="progress progress-xs">
-                    <div class="progress-bar bg-info" role="progressbar" style="width: 56%" aria-valuenow="56" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-danger" role="progressbar" [ngStyle]="{'width':day.value.song + '%'}" aria-valuenow="day.value.song" aria-valuemin="0" aria-valuemax="streamingTotals.song"></div>
                   </div>
                   <div class="progress progress-xs">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 94%" aria-valuenow="94" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="progress-group mb-4">
-                <div class="progress-group-prepend">
-                  <span class="progress-group-text">
-                    Wednesday
-                  </span>
-                </div>
-                <div class="progress-group-bars">
-                  <div class="progress progress-xs">
-                    <div class="progress-bar bg-info" role="progressbar" style="width: 12%" aria-valuenow="12" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-warning" role="progressbar" [ngStyle]="{'width':day.value.episode + '%'}" aria-valuenow="day.value.episode" aria-valuemin="0" aria-valuemax="streamingTotals.episode"></div>
                   </div>
                   <div class="progress progress-xs">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 67%" aria-valuenow="67" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="progress-group mb-4">
-                <div class="progress-group-prepend">
-                  <span class="progress-group-text">
-                    Thursday
-                  </span>
-                </div>
-                <div class="progress-group-bars">
-                  <div class="progress progress-xs">
-                    <div class="progress-bar bg-info" role="progressbar" style="width: 43%" aria-valuenow="43" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <div class="progress progress-xs">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 91%" aria-valuenow="91" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="progress-group mb-4">
-                <div class="progress-group-prepend">
-                  <span class="progress-group-text">
-                    Friday
-                  </span>
-                </div>
-                <div class="progress-group-bars">
-                  <div class="progress progress-xs">
-                    <div class="progress-bar bg-info" role="progressbar" style="width: 22%" aria-valuenow="22" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <div class="progress progress-xs">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 73%" aria-valuenow="73" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="progress-group mb-4">
-                <div class="progress-group-prepend">
-                  <span class="progress-group-text">
-                    Saturday
-                  </span>
-                </div>
-                <div class="progress-group-bars">
-                  <div class="progress progress-xs">
-                    <div class="progress-bar bg-info" role="progressbar" style="width: 53%" aria-valuenow="53" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <div class="progress progress-xs">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 82%" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="progress-group mb-4">
-                <div class="progress-group-prepend">
-                  <span class="progress-group-text">
-                    Sunday
-                  </span>
-                </div>
-                <div class="progress-group-bars">
-                  <div class="progress progress-xs">
-                    <div class="progress-bar bg-info" role="progressbar" style="width: 9%" aria-valuenow="9" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <div class="progress progress-xs">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 69%" aria-valuenow="69" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-success" role="progressbar" [ngStyle]="{'width':day.value.doc + '%'}" aria-valuenow="day.value.doc" aria-valuemin="0" aria-valuemax="streamingTotals.doc"></div>
                   </div>
                 </div>
               </div>
@@ -524,14 +440,14 @@
                   <div class="callout callout-warning">
                     <small class="text-muted">Episodes</small>
                     <br>
-                    <strong class="h4">78,623</strong>
+                    <strong class="h4">{{loeCounts.episode}}, {{streamingTotals.episode}}</strong>
                   </div>
                 </div><!--/.col-->
                 <div class="col-sm-6">
                   <div class="callout callout-success">
                     <small class="text-muted">Docs</small>
                     <br>
-                    <strong class="h4">49,123</strong>
+                    <strong class="h4">{{loeCounts.doc}}, {{streamingTotals.doc}}</strong>
                   </div>
                 </div><!--/.col-->
               </div><!--/.row-->
