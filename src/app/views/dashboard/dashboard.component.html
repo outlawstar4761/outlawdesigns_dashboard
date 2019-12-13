@@ -4,7 +4,7 @@
       <div [ngClass]="_randomWordClass">
         <div class="card-body pb-0">
           <button type="button" class="btn btn-transparent p-0 float-right">
-            <i class="icon-location-pin"></i>
+            <i class="icon-settings"></i>
           </button>
           <div class="text-value">Random Word</div>
           <div>api.outlawdesigns.io:9600</div>
@@ -28,10 +28,10 @@
               <i class="icon-settings"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-              <a class="dropdown-item" href="#">Action</a>
-              <a class="dropdown-item" href="#">Another action</a>
-              <a class="dropdown-item" href="#">Something else here</a>
-              <a class="dropdown-item" href="#">Something else here</a>
+              <a class="dropdown-item" href="#">Send an Invitation</a>
+              <a class="dropdown-item" href="#">Lock/Unlock a User Account</a>
+              <a class="dropdown-item" href="#">Reset a password</a>
+              <a class="dropdown-item" href="#">Active Users</a>
             </div>
           </div>
           <div class="text-value">Accounts</div>
@@ -56,8 +56,8 @@
               <i class="icon-settings"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-              <a class="dropdown-item" href="#">Send Free Form Message</a>
-              <a class="dropdown-item" href="#">Another action</a>
+              <a class="dropdown-item" href="#">Rotate Logs</a>
+              <a class="dropdown-item" href="#">Run Log Monitor</a>
               <a class="dropdown-item" href="#">Something else here</a>
             </div>
           </div>
@@ -83,8 +83,8 @@
               <i class="icon-settings"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-              <a class="dropdown-item" href="#">Action</a>
-              <a class="dropdown-item" href="#">Another action</a>
+              <a class="dropdown-item" href="#">Send Free Form Message</a>
+              <a class="dropdown-item" href="#">View last message</a>
               <a class="dropdown-item" href="#">Something else here</a>
             </div>
           </div>
@@ -139,9 +139,9 @@
               <i class="icon-settings"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-              <a class="dropdown-item" href="#">Action</a>
-              <a class="dropdown-item" href="#">Another action</a>
-              <a class="dropdown-item" href="#">Something else here</a>
+              <a class="dropdown-item" href="#">Initiate a File System Health Check</a>
+              <a class="dropdown-item" href="#">Initiate a Database Health Check</a>
+              <a class="dropdown-item" href="#">Update Play Counts and History</a>
             </div>
           </div>
           <div class="text-value">Buddy System (Live)</div>
@@ -166,7 +166,7 @@
               <i class="icon-settings"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-              <a class="dropdown-item" href="#">Action</a>
+              <a class="dropdown-item" href="#">Rebuild Database</a>
               <a class="dropdown-item" href="#">Another action</a>
               <a class="dropdown-item" href="#">Something else here</a>
             </div>
@@ -452,17 +452,14 @@
                 </div><!--/.col-->
               </div><!--/.row-->
               <hr class="mt-0">
-              <div class="progress-group">
-                <div class="progress-group-header">
-                  <i class="icon-user progress-group-icon"></i>
-                  <div>Male</div>
-                  <div class="ml-auto font-weight-bold">43%</div>
-                </div>
-                <div class="progress-group-bars">
-                  <div class="progress progress-xs">
-                    <div class="progress-bar bg-warning" role="progressbar" style="width: 43%" aria-valuenow="43" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                </div>
+              <div class="chart-wrapper mt-3 mx-3">
+                <canvas baseChart class="chart"
+                [datasets]="musicGenreData"
+                [labels]="weeklyMusicGenreLabels"
+                [options]="brandBoxChartOptions"
+                [colors]="genreChartColors"
+                [legend]="lineChartLegend"
+                [chartType]="genreChartType"></canvas>
               </div>
               <div class="progress-group mb-5">
                 <div class="progress-group-header">

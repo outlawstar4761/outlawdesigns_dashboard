@@ -78,6 +78,7 @@ export class DashboardComponent implements OnInit {
   public weeklyTotals: any = {};
   public now: Date = new Date();
   public dailyRequestLabels: Array<any> = [];
+  public weeklyMusicGenreLabels: Array<any> = ['Death Metal','Black Metal','Thrash Metal','Rap','Hip-Hop','Country','Jazz','Pop'];
   public lineChartLegend = false;
   public lineChartType = 'line';
 
@@ -121,6 +122,12 @@ export class DashboardComponent implements OnInit {
     {
       data: this.buddyRequestsDev,
       label: this._lineChartLabel
+    }
+  ];
+  public musicGenreData: Array<any> = [
+    {
+      data: [22,9,7,19,10,15,5,14],
+      label: ['Downloads']
     }
   ];
   public lineChartOptions: any = {
@@ -199,6 +206,12 @@ export class DashboardComponent implements OnInit {
     }
   ];
   public buddyDevChartColors: Array<any> = [
+    {
+      backgroundColor: getStyle('--primary'),
+      borderColor: 'rgba(255,255,255,.55)',
+    }
+  ];
+  public genreChartColors: Array<any> = [
     {
       backgroundColor: getStyle('--primary'),
       borderColor: 'rgba(255,255,255,.55)',
@@ -291,6 +304,8 @@ export class DashboardComponent implements OnInit {
   ];
   public mainChartLegend = false;
   public mainChartType = 'line';
+
+  public genreChartType = 'bar';
 
   // social box charts
 
@@ -413,7 +428,7 @@ export class DashboardComponent implements OnInit {
       break;
     }
     for(let i in data){
-      if(this.radioModel == 'Week'){
+      if(this.radioModel == 'Week' || this.radioModel == 'Month'){
         updateData.unshift(data[i]);
         updateLabels.unshift(i);
       }else{
