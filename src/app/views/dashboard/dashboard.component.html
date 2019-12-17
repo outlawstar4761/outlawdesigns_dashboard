@@ -1,217 +1,25 @@
 <div class="animated fadeIn">
   <div class="row">
-    <div class="col-sm-6 col-lg-3">
-      <div [ngClass]="_randomWordClass">
+    <div class="col-sm-6 col-lg-3" *ngFor="let host of _hosts">
+      <div [ngClass]="host._tileClass">
         <div class="card-body pb-0">
           <button type="button" class="btn btn-transparent p-0 float-right">
             <i class="icon-settings"></i>
           </button>
-          <div class="text-value">Random Word</div>
-          <div>api.outlawdesigns.io:9600</div>
-        </div>
-        <div class="chart-wrapper mt-3 mx-3" style="height:70px;">
-          <canvas baseChart class="chart"
-          [datasets]="randomWordChartData"
-          [labels]="dailyRequestLabels"
-          [options]="lineChartOptions"
-          [colors]="randomWordChartColors"
-          [legend]="lineChartLegend"
-          [chartType]="lineChartType"></canvas>
-        </div>
-      </div>
-    </div><!--/.col-->
-    <div class="col-sm-6 col-lg-3">
-      <div [ngClass]="_accountsClass">
-        <div class="card-body pb-0">
-          <div class="btn-group float-right" dropdown>
-            <button type="button" class="btn btn-transparent dropdown-toggle p-0" dropdownToggle>
-              <i class="icon-settings"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-              <a class="dropdown-item" href="#">Send an Invitation</a>
-              <a class="dropdown-item" href="#">Lock/Unlock a User Account</a>
-              <a class="dropdown-item" href="#">Reset a password</a>
-              <a class="dropdown-item" href="#">Active Users</a>
-            </div>
+          <div class="text-value">{{host.friendlyLabel}}</div>
+          <div>{{host.label}}:{{host.port}}</div>
+          <div class="chart-wrapper mt-3 mx-3" style="height:70px;">
+            <canvas baseChart class="chart"
+            [datasets]="host._chartData"
+            [labels]="dailyRequestLabels"
+            [options]="lineChartOptions"
+            [colors]="host._chartColors"
+            [legend]="lineChartLegend"
+            [chartType]="lineChartType"></canvas>
           </div>
-          <div class="text-value">Accounts</div>
-          <div>api.outlawdesigns.io:9661</div>
-        </div>
-        <div class="chart-wrapper mt-3 mx-3" style="height:70px;">
-          <canvas baseChart class="chart"
-                  [datasets]="accountChartData"
-                  [labels]="dailyRequestLabels"
-                  [options]="lineChartOptions"
-                  [colors]="accountChartColors"
-                  [legend]="lineChartLegend"
-                  [chartType]="lineChartType"></canvas>
         </div>
       </div>
-    </div><!--/.col-->
-    <div class="col-sm-6 col-lg-3">
-      <div [ngClass]="_webAccessClass">
-        <div class="card-body pb-0">
-          <div class="btn-group float-right" dropdown>
-            <button type="button" class="btn btn-transparent dropdown-toggle p-0" dropdownToggle>
-              <i class="icon-settings"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-              <a class="dropdown-item" href="#">Rotate Logs</a>
-              <a class="dropdown-item" href="#">Run Log Monitor</a>
-              <a class="dropdown-item" href="#">Something else here</a>
-            </div>
-          </div>
-          <div class="text-value">Web Access</div>
-          <div>api.outlawdesigns.io:9500 <sub>{{_logMonitorCountDown}}</sub></div>
-        </div>
-        <div class="chart-wrapper mt-3" style="height:70px;">
-          <canvas baseChart class="chart"
-          [datasets]="WebAccessChartData"
-          [labels]="dailyRequestLabels"
-          [options]="lineChartOptions"
-          [colors]="WebAccessChartColors"
-          [legend]="lineChartLegend"
-          [chartType]="lineChartType"></canvas>
-        </div>
-      </div>
-    </div><!--/.col-->
-    <div class="col-sm-6 col-lg-3">
-      <div [ngClass]="_messengerClass">
-        <div class="card-body pb-0">
-          <div class="btn-group float-right" dropdown>
-            <button type="button" class="btn btn-transparent dropdown-toggle p-0" dropdownToggle>
-              <i class="icon-settings"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-              <a class="dropdown-item" href="#">Send Free Form Message</a>
-              <a class="dropdown-item" href="#">View last message</a>
-              <a class="dropdown-item" href="#">Something else here</a>
-            </div>
-          </div>
-          <div class="text-value">Messenger</div>
-          <div>api.outlawdesigns.io:9667</div>
-        </div>
-        <div class="chart-wrapper mt-3 mx-3" style="height:70px;">
-          <canvas baseChart class="chart"
-          [datasets]="messengerChartData"
-          [labels]="dailyRequestLabels"
-          [options]="lineChartOptions"
-          [colors]="messengerChartColors"
-          [legend]="lineChartLegend"
-          [chartType]="lineChartType"></canvas>
-        </div>
-      </div>
-    </div><!--/.col-->
-  </div><!--/.row-->
-  <div class="row">
-    <div class="col-sm-6 col-lg-3">
-      <div [ngClass]="_loeClass">
-        <div class="card-body pb-0">
-          <div class="btn-group float-right" dropdown>
-            <button type="button" class="btn btn-transparent dropdown-toggle p-0" dropdownToggle>
-              <i class="icon-settings"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-              <a class="dropdown-item" href="#">Action</a>
-              <a class="dropdown-item" href="#">Another action</a>
-              <a class="dropdown-item" href="#">Something else here</a>
-            </div>
-          </div>
-          <div class="text-value">Library of Everything</div>
-          <div>api.outlawdesigns.io:9669</div>
-        </div>
-        <div class="chart-wrapper mt-3 mx-3" style="height:70px;">
-          <canvas baseChart class="chart"
-          [datasets]="loeChartData"
-          [labels]="dailyRequestLabels"
-          [options]="lineChartOptions"
-          [colors]="loeChartColors"
-          [legend]="lineChartLegend"
-          [chartType]="lineChartType"></canvas>
-        </div>
-      </div>
-    </div><!--/.col-->
-    <div class="col-sm-6 col-lg-3">
-      <div [ngClass]="_buddyLiveClass">
-        <div class="card-body pb-0">
-          <div class="btn-group float-right" dropdown>
-            <button type="button" class="btn btn-transparent dropdown-toggle p-0" dropdownToggle>
-              <i class="icon-settings"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-              <a class="dropdown-item" href="#">Initiate a File System Health Check</a>
-              <a class="dropdown-item" href="#">Initiate a Database Health Check</a>
-              <a class="dropdown-item" href="#">Update Play Counts and History</a>
-            </div>
-          </div>
-          <div class="text-value">Buddy System (Live)</div>
-          <div>api.outlawdesigns.io:8663</div>
-        </div>
-        <div class="chart-wrapper mt-3 mx-3" style="height:70px;">
-          <canvas baseChart class="chart"
-          [datasets]="buddyLiveChartData"
-          [labels]="dailyRequestLabels"
-          [options]="lineChartOptions"
-          [colors]="buddyLiveChartColors"
-          [legend]="lineChartLegend"
-          [chartType]="lineChartType"></canvas>
-        </div>
-      </div>
-    </div><!--/.col-->
-    <div class="col-sm-6 col-lg-3">
-      <div [ngClass]="_buddyDevClass">
-        <div class="card-body pb-0">
-          <div class="btn-group float-right" dropdown>
-            <button type="button" class="btn btn-transparent dropdown-toggle p-0" dropdownToggle>
-              <i class="icon-settings"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-              <a class="dropdown-item" href="#">Rebuild Database</a>
-              <a class="dropdown-item" href="#">Another action</a>
-              <a class="dropdown-item" href="#">Something else here</a>
-            </div>
-          </div>
-          <div class="text-value">Buddy System (Dev)</div>
-          <div>api.outlawdesigns.io:4663</div>
-        </div>
-        <div class="chart-wrapper mt-3 mx-3" style="height:70px;">
-          <canvas baseChart class="chart"
-          [datasets]="buddyDevChartData"
-          [labels]="dailyRequestLabels"
-          [options]="lineChartOptions"
-          [colors]="buddyDevChartColors"
-          [legend]="lineChartLegend"
-          [chartType]="lineChartType"></canvas>
-        </div>
-      </div>
-    </div><!--/.col-->
-    <div class="col-sm-6 col-lg-3">
-      <div class="card text-white bg-danger">
-        <div class="card-body pb-0">
-          <div class="btn-group float-right" dropdown>
-            <button type="button" class="btn btn-transparent dropdown-toggle p-0" dropdownToggle>
-              <i class="icon-settings"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-              <a class="dropdown-item" href="#">Action</a>
-              <a class="dropdown-item" href="#">Another action</a>
-              <a class="dropdown-item" href="#">Something else here</a>
-            </div>
-          </div>
-          <div class="text-value">WAMP Router</div>
-          <div>api.outlawdesigns.io:9700</div>
-        </div>
-        <div class="chart-wrapper mt-3 mx-3" style="height:70px;">
-          <canvas baseChart class="chart"
-          [datasets]="messengerChartData"
-          [labels]="dailyRequestLabels"
-          [options]="lineChartOptions"
-          [colors]="messengerChartColors"
-          [legend]="lineChartLegend"
-          [chartType]="lineChartType"></canvas>
-        </div>
-      </div>
-    </div><!--/.col-->
+    </div>
   </div><!--/.row-->
   <div class="card">
     <div class="card-body">

@@ -36,7 +36,7 @@ export class WebaccessService {
       })
     }));
   }
-  getHost(id:number):Observable<Host[]>{
+  getHost(id?:number):Observable<Host[]>{
     let url = this.endPoint + '/host';
     if(id !== undefined){
       url += '/' + id;

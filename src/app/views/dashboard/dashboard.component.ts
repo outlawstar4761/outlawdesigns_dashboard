@@ -5,6 +5,7 @@ import { WebaccessService } from '../../services/webaccess.service';
 import { ApiService } from '../../services/api.service';
 import { AccountService } from '../../services/account.service';
 import { LoeService } from '../../services/loe.service';
+import { Host } from '../../models/host';
 
 @Component({
   templateUrl: 'dashboard.component.html'
@@ -19,22 +20,9 @@ export class DashboardComponent implements OnInit {
   ){}
 
   radioModel: string = 'Year';
-  protected rawRandomWords:Array<number> = [];
-  protected rawAccounts: Array<number> = [];
-  protected rawWebAccess:Array<number> = [];
-  protected rawMessenger: Array<number> = [];
-  protected rawLOE: Array<number> = [];
-  protected rawBuddyLive: Array<number> = [];
-  protected rawBuddyDev: Array<number> = [];
-  protected randomWordRequests: Array<number> = [];
-  protected accountRequests: Array<number> = [];
-  protected webAccessRequests: Array<number> = [];
-  protected messengerRequests: Array<number> = [];
-  protected loeRequests: Array<number> = [];
-  protected buddyRequestsLive: Array<number> = [];
-  protected buddyRequestsDev: Array<number> = [];
   protected loeCounts: any = {};
   protected weeklyStreaming: any = {};
+  protected _hosts: Array<Host> = [];
   protected _lineChartLabel: string = 'Daily Requests';
   protected _logMonitorWaitHours: number = 3;
   protected _logMonitorCountDown: string;
@@ -82,48 +70,6 @@ export class DashboardComponent implements OnInit {
   public lineChartLegend = false;
   public lineChartType = 'line';
 
-  public randomWordChartData: Array<any> = [
-    {
-      data: this.randomWordRequests,
-      label: this._lineChartLabel
-    }
-  ];
-  public accountChartData: Array<any> = [
-    {
-      data: this.accountRequests,
-      label: this._lineChartLabel
-    }
-  ];
-  public WebAccessChartData: Array<any> = [
-    {
-      data: this.webAccessRequests,
-      label: this._lineChartLabel
-    }
-  ];
-  public messengerChartData: Array<any> = [
-    {
-      data: this.messengerRequests,
-      label: this._lineChartLabel
-    }
-  ];
-  public loeChartData: Array<any> = [
-    {
-      data: this.loeRequests,
-      label: this._lineChartLabel
-    }
-  ];
-  public buddyLiveChartData: Array<any> = [
-    {
-      data: this.buddyRequestsLive,
-      label: this._lineChartLabel
-    }
-  ];
-  public buddyDevChartData: Array<any> = [
-    {
-      data: this.buddyRequestsDev,
-      label: this._lineChartLabel
-    }
-  ];
   public musicGenreData: Array<any> = [
     {
       data: [22,9,7,19,10,15,5,14],
@@ -169,48 +115,6 @@ export class DashboardComponent implements OnInit {
       display: false
     }
   };
-  public randomWordChartColors: Array<any> = [
-    { // grey
-      backgroundColor: getStyle('--info'),
-      borderColor: 'rgba(255,255,255,.55)'
-    }
-  ];
-  public accountChartColors: Array<any> = [
-    {
-      backgroundColor: getStyle('--primary'),
-      borderColor: 'rgba(255,255,255,.55)'
-    }
-  ];
-  public WebAccessChartColors: Array<any> = [
-    {
-      backgroundColor: getStyle('--primary'),
-      borderColor: 'rgba(255,255,255,.55)',
-    }
-  ];
-  public messengerChartColors: Array<any> = [
-    {
-      backgroundColor: getStyle('--primary'),
-      borderColor: 'rgba(255,255,255,.55)',
-    }
-  ];
-  public loeChartColors: Array<any> = [
-    {
-      backgroundColor: getStyle('--primary'),
-      borderColor: 'rgba(255,255,255,.55)',
-    }
-  ];
-  public buddyLiveChartColors: Array<any> = [
-    {
-      backgroundColor: getStyle('--primary'),
-      borderColor: 'rgba(255,255,255,.55)',
-    }
-  ];
-  public buddyDevChartColors: Array<any> = [
-    {
-      backgroundColor: getStyle('--primary'),
-      borderColor: 'rgba(255,255,255,.55)',
-    }
-  ];
   public genreChartColors: Array<any> = [
     {
       backgroundColor: getStyle('--primary'),
@@ -377,11 +281,20 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.AccountService.checkCookie();
-    this._buildWeeklyRequests();
-    this._testServices();
+    this._getHosts();
     this._buildRequestCounts();
     this._buildLoeCounts();
     this._startLogMonitorCountDown();
+  }
+  protected _getHosts(){
+    this.WebaccessService.getHost().subscribe((hosts)=>{
+      hosts.forEach((host)=>{
+        host._rawData = [];
+        this._hosts.push(host);
+      });
+      this._buildWeeklyRequests();
+      this._testServices();
+    });
   }
   protected _buildRequestCounts(){
     let theDate = new Date();
@@ -446,13 +359,14 @@ export class DashboardComponent implements OnInit {
       this.WebaccessService.search('request','requestDate',dates[i]).subscribe((requests)=>{
         let sortedData = this._sortRequests(requests);
         this.dailyRequestLabels.push(dates[i]);
-        this.rawRandomWords.push(sortedData['api.outlawdesigns.io_9600'] === undefined ? 0:sortedData['api.outlawdesigns.io_9600'].length);
-        this.rawAccounts.push(sortedData['api.outlawdesigns.io_9661'] === undefined ? 0:sortedData['api.outlawdesigns.io_9661'].length);
-        this.rawWebAccess.push(sortedData['api.outlawdesigns.io_9500'] === undefined ? 0:sortedData['api.outlawdesigns.io_9500'].length);
-        this.rawMessenger.push(sortedData['api.outlawdesigns.io_9667'] === undefined ? 0:sortedData['api.outlawdesigns.io_9667'].length);
-        this.rawLOE.push(sortedData['api.outlawdesigns.io_9669'] === undefined ? 0:sortedData['api.outlawdesigns.io_9669'].length);
-        this.rawBuddyLive.push(sortedData['api.outlawdesigns.io_8663'] === undefined ? 0:sortedData['api.outlawdesigns.io_8663'].length);
-        this.rawBuddyDev.push(sortedData['api.outlawdesigns.io_4663'] === undefined ? 0:sortedData['api.outlawdesigns.io_4663'].length);
+        this._hosts.forEach((host)=>{
+          let keys = Object.keys(sortedData);
+          if(keys.indexOf(host.label + '_' + host.port) !== -1){
+            host._rawData.push(sortedData[host.label + '_' + host.port].length);
+          }else{
+            host._rawData.push(0);
+          }
+        });
         if(this.dailyRequestLabels.length === 7){
           this._sortValues();
         }
@@ -516,91 +430,23 @@ export class DashboardComponent implements OnInit {
   protected _sortValues(){
     let tmpDates = [...this.dailyRequestLabels].sort();
     let tmpArr = [];
-    tmpDates.forEach((date)=>{
-      let index = this.dailyRequestLabels.indexOf(date);
-      this.randomWordRequests.push(this.rawRandomWords[index]);
-    });
-    tmpArr = [];
-    tmpDates.forEach((date)=>{
-      let index = this.dailyRequestLabels.indexOf(date);
-      this.accountRequests.push(this.rawAccounts[index]);
-    });
-    tmpArr = [];
-    tmpDates.forEach((date)=>{
-      let index = this.dailyRequestLabels.indexOf(date);
-      this.webAccessRequests.push(this.rawWebAccess[index]);
-    });
-    tmpArr = [];
-    tmpDates.forEach((date)=>{
-      let index = this.dailyRequestLabels.indexOf(date);
-      this.messengerRequests.push(this.rawMessenger[index]);
-    });
-    tmpArr = [];
-    tmpDates.forEach((date)=>{
-      let index = this.dailyRequestLabels.indexOf(date);
-      this.loeRequests.push(this.rawLOE[index]);
-    });
-    tmpArr = [];
-    tmpDates.forEach((date)=>{
-      let index = this.dailyRequestLabels.indexOf(date);
-      this.buddyRequestsLive.push(this.rawBuddyLive[index]);
-    });
-    tmpArr = [];
-    tmpDates.forEach((date)=>{
-      let index = this.dailyRequestLabels.indexOf(date);
-      this.buddyRequestsDev.push(this.rawBuddyDev[index]);
+    this._hosts.forEach((host)=>{
+      tmpDates.forEach((date)=>{
+        let index = this.dailyRequestLabels.indexOf(date);
+        host._sortedData.push(host._rawData[index]);
+      });
     });
     this.dailyRequestLabels.sort();
   }
   protected _testServices(){
-    this.ApiService.testService('http://api.outlawdesigns.io:9600').subscribe((response)=>{
-      this._randomWordClass[2] = 'bg-success';
-      this.randomWordChartColors[0].backgroundColor = getStyle('--success');
-    },(err)=>{
-      this._randomWordClass[2] = 'bg-danger';
-      this.randomWordChartColors[0].backgroundColor = getStyle('--danger');
-    });
-    this.ApiService.testService('http://api.outlawdesigns.io:9661/verify').subscribe((response)=>{
-      this._accountsClass[2] = 'bg-success';
-      this.accountChartColors[0].backgroundColor = getStyle('--success');
-    },(err)=>{
-      this._accountsClass[2] = 'bg-danger';
-      this.accountChartColors[0].backgroundColor = getStyle('--success');
-    });
-    this.ApiService.testService('http://api.outlawdesigns.io:9500/verify').subscribe((response)=>{
-      this._webAccessClass[2] = "bg-success";
-      this.WebAccessChartColors[0].backgroundColor = getStyle('--success');
-    },(err)=>{
-      this._webAccessClass[2] = "bg-danger";
-      this.WebAccessChartColors[0].backgroundColor = getStyle('--danger');
-    });
-    this.ApiService.testService('http://api.outlawdesigns.io:9667/verify').subscribe((response)=>{
-      this._messengerClass[2] = 'bg-success';
-      this.messengerChartColors[0].backgroundColor = getStyle('--success');
-    },(err)=>{
-      this._messengerClass[2] = 'bg-danger';
-      this.messengerChartColors[0].backgroundColor = getStyle('--danger');
-    });
-    this.ApiService.testService('http://api.outlawdesigns.io:9669/verify').subscribe((response)=>{
-      this._loeClass[2] = 'bg-success';
-      this.loeChartColors[0].backgroundColor = getStyle('--success');
-    },(err)=>{
-      this._loeClass[2] = 'bg-danger';
-      this.loeChartColors[0].backgroundColor = getStyle('--danger');
-    });
-    this.ApiService.testService('http://api.outlawdesigns.io:8663/verify').subscribe((response)=>{
-      this._buddyLiveClass[2] = 'bg-success';
-      this.buddyLiveChartColors[0].backgroundColor = getStyle('--success');
-    },(err)=>{
-      this._buddyLiveClass[2] = 'bg-danger';
-      this.buddyLiveChartColors[0].backgroundColor = getStyle('--danger');
-    });
-    this.ApiService.testService('http://api.outlawdesigns.io:4663/verify').subscribe((response)=>{
-      this._buddyDevClass[2] = 'bg-success';
-      this.buddyDevChartColors[0].backgroundColor = getStyle('--success');
-    },(err)=>{
-      this._buddyDevClass[2] = 'bg-danger';
-      this.buddyDevChartColors[0].backgroundColor = getStyle('--danger');
+    this._hosts.forEach((host)=>{
+      this.ApiService.testService('http://' + host.label + ':' + host.port + '/verify').subscribe((response)=>{
+        host._tileClass[2] = 'bg-success';
+        host._chartColors[0].backgroundColor = getStyle('--success');
+      },(err)=>{
+        host._tileClass[2] = 'bg-danger';
+        host._chartColors[0].backgroundColor = getStyle('--danger');
+      });
     });
   }
   protected _getMainChartMax(){
