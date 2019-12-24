@@ -6,6 +6,7 @@ import { ApiService } from '../../services/api.service';
 import { AccountService } from '../../services/account.service';
 import { LoeService } from '../../services/loe.service';
 import { Host } from '../../models/host';
+import autobahn from 'autobahn';
 
 @Component({
   templateUrl: 'dashboard.component.html'
@@ -19,20 +20,20 @@ export class DashboardComponent implements OnInit {
     private LoeService:LoeService
   ){}
 
-  radioModel: string = 'Year';
+  radioModel: string = 'Week';
   protected loeCounts: any = {};
   protected weeklyStreaming: any = {};
   protected _hosts: Array<Host> = [];
   protected _lineChartLabel: string = 'Daily Requests';
-  protected _logMonitorWaitHours: number = 3;
+  protected _logMonitorWaitHours: number = .75;
   protected _logMonitorCountDown: string;
-  protected _randomWordClass = ['card','text-white','bg-primary'];
-  protected _webAccessClass = ['card','text-white','bg-primary'];
-  protected _accountsClass = ['card','text-white','bg-primary'];
-  protected _messengerClass = ['card','text-white','bg-primary'];
-  protected _loeClass = ['card','text-white','bg-primary'];
-  protected _buddyLiveClass = ['card','text-white','bg-primary'];
-  protected _buddyDevClass = ['card','text-white','bg-primary'];
+  protected _wampConnection: any;
+  protected _outreachTorrents: Array<any>;
+  protected _outreachIp: string = '127.0.0.1';
+  protected _logInterval: any;
+  protected _torrentInterval: any;
+  protected _torrentInfo: any = {};
+  protected _torrentStats: any = {};
 
 
   public monthLabels: Array<string> = [
@@ -276,7 +277,7 @@ export class DashboardComponent implements OnInit {
       pointHoverBackgroundColor: '#fff'
     }
   ];
-  public brandBoxChartLegend = false;
+  public brandBoxChartLegend = true;
   public brandBoxChartType = 'line';
 
   ngOnInit(): void {
@@ -285,6 +286,7 @@ export class DashboardComponent implements OnInit {
     this._buildRequestCounts();
     this._buildLoeCounts();
     this._startLogMonitorCountDown();
+    this._wampInit();
   }
   protected _getHosts(){
     this.WebaccessService.getHost().subscribe((hosts)=>{
@@ -383,7 +385,7 @@ export class DashboardComponent implements OnInit {
     });
     let dates = this._buildWeeklyDates();
     dates.forEach((date)=>{
-      let label = this._getDayLabel(new Date(date + ' UTC').getDay());
+      let label = this._getDayLabel(date);
       this.weeklyStreaming[date] = {};
       streamingModels.forEach((model)=>{
         let key = 'played' + model.charAt(0).toUpperCase() + model.slice(1);
@@ -401,8 +403,8 @@ export class DashboardComponent implements OnInit {
   protected _getMonthLabel(monthNum){
     return this.monthLabels[monthNum];
   }
-  protected _getDayLabel(dayNum){
-    return this.dayLabels[dayNum];
+  protected _getDayLabel(dateStr){
+    return this.dayLabels[new Date(dateStr).getDay()];
   }
   protected _buildWeeklyDates(){
     let today = new Date();
@@ -461,7 +463,7 @@ export class DashboardComponent implements OnInit {
   }
   protected _startLogMonitorCountDown(){
     this.WebaccessService.recent('logmonitorrun',1).subscribe((lastRun)=>{
-      let interval = setInterval(()=>{
+      this._logInterval = setInterval(()=>{
         let nextRun = this._calculateNextLogMonitorRun(lastRun[0].StartTime + ' UTC');
         let now = new Date().getTime();
         let difference = nextRun.getTime() - now;
@@ -470,10 +472,62 @@ export class DashboardComponent implements OnInit {
         let seconds = Math.floor((difference % (1000 * 60)) / 1000);
         this._logMonitorCountDown = hours + 'h ' + minutes + 'm ' + seconds + 's';
         if(difference < 0){
-          clearInterval(interval);
+          clearInterval(this._logInterval);
           this._logMonitorCountDown = 'Executing';
         }
       },1000);
     });
+  }
+  protected _startTorrentUpdate(){
+    this._updateTorrents();
+    this._torrentInterval = setInterval(()=>{
+      this._updateTorrents();
+      this._updateTorrentStats();
+    },300);
+
+  }
+  protected _wampInit(){
+    this._wampConnection = new autobahn.Connection({
+      url:'ws://api.outlawdesigns.io:9700/ws',
+      realm:'realm1'
+    });
+    this._wampConnection.onopen = (session)=>{
+      this._startTorrentUpdate();
+      this._updateTorrentInfo();
+      this._checkOutreachIp();
+    };
+    this._wampConnection.open();
+  }
+  protected _checkOutreachIp(){
+    this._wampConnection.session.call('io.outlawdesigns.outreach.checkIp').then((serverIp)=>{
+      this._outreachIp = serverIp;
+    },console.log);
+  }
+  protected _updateTorrents(){
+    this._wampConnection.session.call('io.outlawdesigns.outreach.getTorrents').then((torrentList)=>{
+      this._outreachTorrents = torrentList;
+    });
+  }
+  protected _startTorrent(torrentId){
+    this._wampConnection.session.call('io.outlawdesigns.outreach.startTorrent',[torrentId]).then(console.log,console.log);
+  }
+  protected _stopTorrent(torrentId){
+    this._wampConnection.session.call('io.outlawdesigns.outreach.stopTorrent',[torrentId]).then(console.log,console.log);
+  }
+  protected _removeTorrent(torrentId){
+    this._wampConnection.session.call('io.outlawdesigns.outreach.removeTorrent',[torrentId]).then(console.log,console.log);
+  }
+  protected _radTorrent(torrentId){
+    this._wampConnection.session.call('io.outlawdesigns.outreach.removeTorrentAndData',[torrentId]).then(console.log,console.log);
+  }
+  protected _updateTorrentInfo(){
+    this._wampConnection.session.call('io.outlawdesigns.outreach.getSessionInfo').then((info)=>{
+      this._torrentInfo = info;
+    },console.log);
+  }
+  protected _updateTorrentStats(){
+    this._wampConnection.session.call('io.outlawdesigns.outreach.getSessionStats').then((stats)=>{
+      this._torrentStats = stats;
+    },console.log);
   }
 }
