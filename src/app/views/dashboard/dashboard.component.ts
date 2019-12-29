@@ -21,19 +21,19 @@ export class DashboardComponent implements OnInit {
   ){}
 
   radioModel: string = 'Week';
-  protected loeCounts: any = {};
-  protected weeklyStreaming: any = {};
-  protected _hosts: Array<Host> = [];
-  protected _lineChartLabel: string = 'Daily Requests';
-  protected _logMonitorWaitHours: number = .75;
-  protected _logMonitorCountDown: string;
-  protected _wampConnection: any;
-  protected _outreachTorrents: Array<any>;
-  protected _outreachIp: string = '127.0.0.1';
-  protected _logInterval: any;
-  protected _torrentInterval: any;
-  protected _torrentInfo: any = {};
-  protected _torrentStats: any = {};
+  public loeCounts: any = {};
+  public weeklyStreaming: any = {};
+  public _hosts: Array<Host> = [];
+  public _lineChartLabel: string = 'Daily Requests';
+  public _logMonitorWaitHours: number = .75;
+  public _logMonitorCountDown: string;
+  public _wampConnection: any;
+  public _outreachTorrents: Array<any>;
+  public _outreachIp: string = '127.0.0.1';
+  public _logInterval: any;
+  public _torrentInterval: any;
+  public _torrentInfo: any = {};
+  public _torrentStats: any = {};
 
 
   public monthLabels: Array<string> = [
@@ -124,8 +124,8 @@ export class DashboardComponent implements OnInit {
   ];
 
   // mainChart
-  protected _mainChartYAxisMax: number;
-  protected _mainChartYAxisStepSize: number;
+  public _mainChartYAxisMax: number;
+  public _mainChartYAxisStepSize: number;
   public mainChartData1: Array<number> = [];
   public mainChartLabels: Array<any> = [];
   public mainChartData: Array<any> = [
@@ -288,7 +288,7 @@ export class DashboardComponent implements OnInit {
     this._startLogMonitorCountDown();
     this._wampInit();
   }
-  protected _getHosts(){
+  public _getHosts(){
     this.WebaccessService.getHost().subscribe((hosts)=>{
       hosts.forEach((host)=>{
         host._rawData = [];
@@ -298,7 +298,7 @@ export class DashboardComponent implements OnInit {
       this._testServices();
     });
   }
-  protected _buildRequestCounts(){
+  public _buildRequestCounts(){
     let theDate = new Date();
     let thisMonth = theDate.getMonth();
     let thisYear = theDate.getFullYear();
@@ -327,7 +327,7 @@ export class DashboardComponent implements OnInit {
       this._getMainChartMax();
     });
   }
-  protected _updateMainChart(){
+  public _updateMainChart(){
     let updateData = [];
     let updateLabels = [];
     let data = null;
@@ -355,7 +355,7 @@ export class DashboardComponent implements OnInit {
     this.mainChartLabels = updateLabels;
     this._getMainChartMax();
   }
-  protected _buildWeeklyRequests(){
+  public _buildWeeklyRequests(){
     let dates = this._buildWeeklyDates();
     for(let i in dates){
       this.WebaccessService.search('request','requestDate',dates[i]).subscribe((requests)=>{
@@ -375,7 +375,7 @@ export class DashboardComponent implements OnInit {
       });
     }
   }
-  protected _buildLoeCounts(){
+  public _buildLoeCounts(){
     let models = ['song','movie','doc','episode'];
     let streamingModels = ['song'];
     models.forEach((model)=>{
@@ -396,17 +396,17 @@ export class DashboardComponent implements OnInit {
       });
     });
   }
-  protected _buildDateStr(dateStr){
+  public _buildDateStr(dateStr){
     let theDate = (dateStr === undefined ? new Date():new Date(dateStr));
     return theDate.getFullYear() + "-" + (theDate.getMonth() + 1) + "-" + (theDate.getDate() < 10 ? "0" + theDate.getDate() : theDate.getDate());
   }
-  protected _getMonthLabel(monthNum){
+  public _getMonthLabel(monthNum){
     return this.monthLabels[monthNum];
   }
-  protected _getDayLabel(dateStr){
+  public _getDayLabel(dateStr){
     return this.dayLabels[new Date(dateStr).getDay()];
   }
-  protected _buildWeeklyDates(){
+  public _buildWeeklyDates(){
     let today = new Date();
     let dates = [];
     dates.push(this._buildDateStr(today));
@@ -416,7 +416,7 @@ export class DashboardComponent implements OnInit {
     }
     return dates;
   }
-  protected _sortRequests(data){
+  public _sortRequests(data){
     let _goodData = {};
     for(let i in data){
       let key = data[i].host + '_' + data[i].port;
@@ -429,7 +429,7 @@ export class DashboardComponent implements OnInit {
     }
     return _goodData;
   }
-  protected _sortValues(){
+  public _sortValues(){
     let tmpDates = [...this.dailyRequestLabels].sort();
     let tmpArr = [];
     this._hosts.forEach((host)=>{
@@ -440,7 +440,7 @@ export class DashboardComponent implements OnInit {
     });
     this.dailyRequestLabels.sort();
   }
-  protected _testServices(){
+  public _testServices(){
     this._hosts.forEach((host)=>{
       this.ApiService.testService('http://' + host.label + ':' + host.port + '/verify').subscribe((response)=>{
         host._tileClass[2] = 'bg-success';
@@ -451,17 +451,17 @@ export class DashboardComponent implements OnInit {
       });
     });
   }
-  protected _getMainChartMax(){
+  public _getMainChartMax(){
     let highest = [...this.mainChartData1].sort()[this.mainChartData1.length - 1];
     this._mainChartYAxisMax = (highest * .10) + highest;
     this._mainChartYAxisStepSize = Math.ceil(this._mainChartYAxisMax / 10);
   }
-  protected _calculateNextLogMonitorRun(lastRunStr){
+  public _calculateNextLogMonitorRun(lastRunStr){
     let localTime = new Date(lastRunStr + ' UTC');
     let nextRun = new Date(localTime.getTime() + (this._logMonitorWaitHours * 60 * 60 * 1000));
     return nextRun;
   }
-  protected _startLogMonitorCountDown(){
+  public _startLogMonitorCountDown(){
     this.WebaccessService.recent('logmonitorrun',1).subscribe((lastRun)=>{
       this._logInterval = setInterval(()=>{
         let nextRun = this._calculateNextLogMonitorRun(lastRun[0].StartTime + ' UTC');
@@ -478,7 +478,7 @@ export class DashboardComponent implements OnInit {
       },1000);
     });
   }
-  protected _startTorrentUpdate(){
+  public _startTorrentUpdate(){
     this._updateTorrents();
     this._torrentInterval = setInterval(()=>{
       this._updateTorrents();
@@ -486,7 +486,7 @@ export class DashboardComponent implements OnInit {
     },300);
 
   }
-  protected _wampInit(){
+  public _wampInit(){
     this._wampConnection = new autobahn.Connection({
       url:'ws://api.outlawdesigns.io:9700/ws',
       realm:'realm1'
@@ -498,34 +498,34 @@ export class DashboardComponent implements OnInit {
     };
     this._wampConnection.open();
   }
-  protected _checkOutreachIp(){
+  public _checkOutreachIp(){
     this._wampConnection.session.call('io.outlawdesigns.outreach.checkIp').then((serverIp)=>{
       this._outreachIp = serverIp;
     },console.log);
   }
-  protected _updateTorrents(){
+  public _updateTorrents(){
     this._wampConnection.session.call('io.outlawdesigns.outreach.getTorrents').then((torrentList)=>{
       this._outreachTorrents = torrentList;
     });
   }
-  protected _startTorrent(torrentId){
+  public _startTorrent(torrentId){
     this._wampConnection.session.call('io.outlawdesigns.outreach.startTorrent',[torrentId]).then(console.log,console.log);
   }
-  protected _stopTorrent(torrentId){
+  public _stopTorrent(torrentId){
     this._wampConnection.session.call('io.outlawdesigns.outreach.stopTorrent',[torrentId]).then(console.log,console.log);
   }
-  protected _removeTorrent(torrentId){
+  public _removeTorrent(torrentId){
     this._wampConnection.session.call('io.outlawdesigns.outreach.removeTorrent',[torrentId]).then(console.log,console.log);
   }
-  protected _radTorrent(torrentId){
+  public _radTorrent(torrentId){
     this._wampConnection.session.call('io.outlawdesigns.outreach.removeTorrentAndData',[torrentId]).then(console.log,console.log);
   }
-  protected _updateTorrentInfo(){
+  public _updateTorrentInfo(){
     this._wampConnection.session.call('io.outlawdesigns.outreach.getSessionInfo').then((info)=>{
       this._torrentInfo = info;
     },console.log);
   }
-  protected _updateTorrentStats(){
+  public _updateTorrentStats(){
     this._wampConnection.session.call('io.outlawdesigns.outreach.getSessionStats').then((stats)=>{
       this._torrentStats = stats;
     },console.log);
