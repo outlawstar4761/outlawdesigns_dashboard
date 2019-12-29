@@ -72,7 +72,7 @@ import { ChartsModule } from 'ng2-charts';
     RegisterComponent
   ],
   providers: [
-    {provide: LocationStrategy,useClass: HashLocationStrategy},
+    // {provide: LocationStrategy,useClass: HashLocationStrategy},
     CookieService,
     {provide:'RANDOMWORD',useValue:'http://api.outlawdesigns.io:9600'},
     {provide:'ACCOUNT',useValue:'http://api.outlawdesigns.io:9661'},
